@@ -2,6 +2,8 @@
 {
     class Resources
     {
+        // 这个类, 就是用来存放一些静态的资源的, 比如说, css, js, xml, help 等等
+        // 将所有的资源都放在这里, 有利于管理, 也有利于修改
         static public string configFile = "DumpReportCfg.xml";
 
         #region css

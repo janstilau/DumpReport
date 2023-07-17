@@ -45,6 +45,7 @@ namespace DumpReport
                 config.CheckArguments();
 
                 WriteDebuggerVersion();
+
                 WriteConsole("Processing dump " + config.DumpFile);
                 WriteConsole("Checking dump bitness...", true);
                 // Find out dump bitness.
@@ -252,9 +253,11 @@ namespace DumpReport
             exitCode = EXIT_FAILURE;
         }
 
+        // 在程序的开始, 打印了一下层序的名称和版本号.
         public static void WriteTitle()
         {
             if (config.QuietMode) return;
+            // 系统提供了一些公用的方法, 用来获取当前正在执行的程序的信息, 包括这个可执行文件的路径, 版本号等等
             Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             Version version = assembly.GetName().Version;
             Console.ForegroundColor = ConsoleColor.White;

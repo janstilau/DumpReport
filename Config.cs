@@ -7,6 +7,7 @@ namespace DumpReport
     /// <summary>
     /// Contains the input parameters, specified from command line and from the XML configuration file.
     /// </summary>
+    /// 所有的配置, 无论是 cmd 传递的, 还是配置文件的, 最终在内存里面, 是汇集到了这里.
     class Config
     {
         public string DbgExe64 { get; set; }        // Full path of the 64-bit version debugger
@@ -43,11 +44,16 @@ namespace DumpReport
 
         // If the user requested for help, displays the help in the console and returns true.
         // Otherwise returns false.
+        // 命令行程序, 其实就是一个类似函数的东西. 他具有的是固定的流程, 这个流程, 就是根据命令行参数来分辨的. 
+        // 在这里, 作者提供了完善的 help 提示系统.
         public bool CheckHelp(string[] args)
         {
+            // 从这里来看, 应该是系统将第一个参数删除了, 这样应用程序获取的, 就是纯业务数据了. 如果没有参数, 或者参数是 /?, 那么就打印帮助信息.
             if (args.Length == 0 || (args.Length == 1 && args[0] == "/?"))
                 return PrintAppHelp();
 
+            // 这里的逻辑, 不应该在这里, 应该抽取出去. 
+            // 对于特定的参数, 有特定的处理逻辑, 将这些逻辑集中到这里处理了.
             for (int idx = 0; idx < args.Length; idx++)
             {
                 if (args[idx] == "/CONFIG")
@@ -71,6 +77,7 @@ namespace DumpReport
         }
 
         // Reads the parameters from the configuration file
+        // 在程序的开始, 就执行到这里, 
         public void ReadConfigFile(string configPath)
         {
             string value;
