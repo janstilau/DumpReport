@@ -129,7 +129,7 @@ namespace DumpReport
         }
 
         // Launches the debugger, which automatically executes a script and stores the output into a file
-        public static void LaunchDebugger(string script, string outFile, bool showProgress = false)
+        public static void LaunchDebugger(string injectedScript, string outFile, bool showProgress = false)
         {
             LogProgress progress = showProgress ? new LogProgress() : null;
 
@@ -137,7 +137,7 @@ namespace DumpReport
             string scriptFile = Path.Combine(Path.GetTempPath(), "WinDbgScript.txt");
 
             // Replace special marks in the original script
-            script = PreprocessScript(script, outFile, progress);
+            injectedScript = PreprocessScript(injectedScript, outFile, progress);
 
             // Remove old files
             File.Delete(scriptFile);
@@ -145,7 +145,7 @@ namespace DumpReport
 
             // Create the script file
             using (StreamWriter stream = new StreamWriter(scriptFile))
-                stream.WriteLine(script);
+                stream.WriteLine(injectedScript);
 
             // Start the debugger
             string arguments = string.Format(@"-y ""{0};srv*{1}*http://msdl.microsoft.com/download/symbols"" -z ""{2}"" -c ""$$><{3};q""",

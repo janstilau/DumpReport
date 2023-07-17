@@ -25,6 +25,7 @@ namespace DumpReport
         public bool LogClean { get; set; }          // If true, log files are deleted after execution
         public string SourceCodeRoot { get; set; }  // Specifies a root folder for the source files
 
+        // 构造函数的主要作用, 就是完成所有的成员变量的初始化, 这是正确的.
         public Config()
         {
             DbgExe64 = String.Empty;
@@ -78,6 +79,20 @@ namespace DumpReport
 
         // Reads the parameters from the configuration file
         // 在程序的开始, 就执行到这里, 
+        /*
+         *
+         <?xml version="1.0" encoding="utf-8" ?>
+<Config>
+    <Debugger exe64="C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe" exe32="C:\Program Files (x86)\Windows Kits\10\Debuggers\x86\cdb.exe" timeout="60" />
+    <Pdb folder="" />
+    <Style file="" />
+    <Report file=".\DumpReport.html" show="1" />
+    <Log folder="" clean="1"/>
+    <SymbolCache folder="" />
+    <SourceCodeRoot folder="D:\CodeHub\DictCrash\ErrorTrigger" />
+</Config >
+
+         */
         public void ReadConfigFile(string configPath)
         {
             string value;
@@ -92,6 +107,8 @@ namespace DumpReport
                     {
                         if (reader.IsStartElement())
                         {
+                            // 所有的配置, 都是使用属性的方式进行的配置
+                            // 所有, 当读到相应的节点之后, 直接就是读取相关的属性就可以了.
                             switch (reader.Name)
                             {
                                 case "Debugger":
@@ -164,6 +181,7 @@ namespace DumpReport
             {
                 for (int idx = 0; idx < args.Length; idx++)
                 {
+                    // 从这里看, C# 在函数调用的时候, 也是可以增加 param 的前缀的.
                     if (args[idx] == "/DUMPFILE") DumpFile = GetParamValue(args, ref idx);
                     else if (args[idx] == "/PDBFOLDER") PdbFolder = GetParamValue(args, ref idx);
                     else if (args[idx] == "/REPORTFILE") ReportFile = GetParamValue(args, ref idx);
@@ -188,8 +206,10 @@ namespace DumpReport
             return args[++idx];
         }
 
+        // 判断一些, 给出的 debug 到底是哪个程序.
         public void CheckDebugger(string dbgFullPath, string bitness)
         {
+            // 如果没有设定相关的路径, 其实是不会进行校验的.
             if (dbgFullPath.Length > 0)
             {
                 if (!File.Exists(dbgFullPath))
@@ -201,6 +221,7 @@ namespace DumpReport
         }
 
         // Checks that the files and folders exist and sets all paths to absolute paths.
+        // 当运行到这里的时候, 其实是所有的参数都确认了. 所以可以完成最终的参数校验了. 
         public void CheckArguments()
         {
             // Check dump file path.
@@ -225,15 +246,19 @@ namespace DumpReport
                 throw new ArgumentException("No debuggers specified in the configuration file.\r\nPlease type 'DumpReport /CONFIG HELP' for help.");
             if (!Environment.Is64BitOperatingSystem && DbgExe32.Length == 0)
                 throw new Exception("The attribute 'exe32' must be set on 32-bit computers.");
+            
+            // 进行可执行程序的校验 
             CheckDebugger(DbgExe64, "64-bit");
             CheckDebugger(DbgExe32, "32-bit");
 
             // Check style file.
+            // 这个是最终输出到 html 里面, 引入的程序
             StyleFile = Utils.GetAbsolutePath(StyleFile);
             if (StyleFile.Length > 0 && !File.Exists(StyleFile))
                 throw new ArgumentException("Style file (CSS) not found: " + StyleFile);
 
             // Check log file.
+            // 如果制定了Log所在位置, 就输出到这里. 可能应该是为了收集 log 使用的
             LogFolder = Utils.GetAbsolutePath(LogFolder);
             if (LogFolder.Length > 0)
             {

@@ -328,3 +328,74 @@ r @$t0 = 0;
         #endregion
     }
 }
+
+
+/*
+ 这些参数是 WinDbg 的命令行参数。WinDbg 是一个 Windows 调试器，用于调试用户模式应用程序和内核模式驱动程序。这些参数的作用如下：
+
+- `-y "D:\CodeHub\DictCrash\output\Release;srv**http://msdl.microsoft.com/download/symbols"`：指定符号路径。符号路径是一个分号分隔的列表，其中每个条目都是一个符号服务器或符号目录¹。
+- `-z "D:\CodeHub\DictCrash\output\Release\dmps\3_2_0__Release_1689316365306.dmp"`：指定要调试的转储文件的路径¹。
+- `-c "$$><C:\Users\liugq01\AppData\Local\Temp\WinDbgScript.txt;q"`：指定在启动时运行的初始调试器命令。这个命令必须用引号括起来。多个命令可以用分号分隔¹。
+
+
+
+
+
+这些命令看起来像是 WinDbg 的命令。WinDbg 是一个 Windows 调试器，用于调试用户模式应用程序和内核模式驱动程序。这些命令的作用如下：
+
+- `.logopen /u ""{LOG_FILE}""`：打开一个日志文件并将其写入 Unicode 格式。如果省略此选项，则调试器将以 ASCII（ANSI）格式写入日志文件¹⁷。
+- `.foreach (module {lm1m} )`：遍历所有模块。
+- `.if ($sicmp(""${module}"",""wow64"") == 0)`：如果模块名称与 "wow64" 相同（不区分大小写），则执行后面的语句。
+- `.echo WOW64 found`：在调试器窗口中输出 "WOW64 found"。
+- `.effmach`：显示或更改调试器使用的处理器模式¹³。
+- `.logclose`：关闭当前打开的日志文件¹⁸。
+
+
+
+
+
+- `.logopen /u ""{LOG_FILE}""`：打开一个日志文件并将其写入 Unicode 格式。如果省略此选项，则调试器将以 ASCII（ANSI）格式写入日志文件。
+- `{PROGRESS_STEP}`：这个命令看起来像是一个自定义的宏或脚本，它的作用取决于它的定义。
+- `.lines -e`：启用源代码行号信息。这样，在调试器窗口中显示堆栈跟踪时，将显示源代码行号。
+- `.foreach (module {lm1m} )`：遍历所有模块。
+- `.if ($sicmp(""${module}"",""wow64"") == 0)`：如果模块名称与 "wow64" 相同（不区分大小写），则执行后面的语句。
+- `.load soswow64`：加载 soswow64 扩展。soswow64 是一个调试扩展，用于调试运行在 WOW64（Windows 32-bit on Windows 64-bit）环境中的托管应用程序。
+- `.echo WOW64 found`：在调试器窗口中输出 "WOW64 found"。
+- `.effmach x86`：更改调试器使用的处理器模式为 x86。
+- `.effmach`：显示或更改调试器使用的处理器模式。
+- `.time`：显示当前时间和日期。
+- `.cordll -ve -u -l`：加载并初始化 CLR 调试器扩展（例如 SOS）。这个命令会自动加载最新版本的 CLR 调试器扩展，并在必要时从符号服务器下载它。
+- `.chain`：显示已加载的调试器扩展和它们的版本信息。
+- `.echo > !eeversion`：在调试器窗口中输出 "> !eeversion"。
+- `!eeversion`：显示 CLR 的版本信息。这个命令是 SOS 扩展的一部分。
+- `.echo >>> TARGET INFO`：在调试器窗口中输出 ">>> TARGET INFO"。
+- `!envvar COMPUTERNAME`：显示环境变量 COMPUTERNAME 的值。这个命令是 SOS 扩展的一部分。
+- `!envvar USERNAME`：显示环境变量 USERNAME 的值。这个命令是 SOS 扩展的一部分。
+- `.echo PROCESS_ID:`：在调试器窗口中输出 "PROCESS_ID:"。
+- `.`：这个命令会在调试器窗口中输出当前进程的 ID。
+- `.echo TARGET:`：在调试器窗口中输出 "TARGET:"。
+- `vertarget`：显示有关目标计算机和操作系统的信息。
+- `!peb`：显示进程环境块（PEB）的内容。这个命令是 SOS 扩展的一部分。
+- `.echo >>> MANAGED THREADS`：在调试器窗口中输出 ">>> MANAGED THREADS"。
+- `!Threads`：显示所有托管线程的信息。这个命令是 SOS 扩展的一部分。
+- `.echo >>> MANAGED STACKS`：在调试器窗口中输出 ">>> MANAGED STACKS"。
+- `.block { ~* e !clrstack }`：对所有线程执行 `!clrstack` 命令。`.block { ... }` 是一个块语句，它会执行花括号内的所有命令。`~* e ...` 是一个线程命令，它会对所有线程执行指定的命令。`!clrstack` 显示当前托管堆栈。这个命令是 SOS 扩展的一部分。
+- `.echo >>> EXCEPTION INFO`：在调试器窗口中输出 ">>> EXCEPTION INFO"。
+- `.exr -1`：显示最近一次异常的异常记录（EXCEPTION_RECORD）。
+- `.echo EXCEPTION CONTEXT RECORD:`：在调试器窗口中输出 "EXCEPTION CONTEXT RECORD:"。
+- `.ecxr`：显示异常上下文记录（CONTEXT_RECORD）。
+- `.echo EXCEPTION CALL STACK:`：在调试器窗口中输出 "EXCEPTION CALL STACK:"。
+- `~#`：切换到发生异常的线程。
+- `kv n`：显示带有源代码行号和参数值的堆栈跟踪。`n` 选项表示不要显示源文件名称和行号。
+- `.echo >>> HEAP`：在调试器窗口中输出 ">>> HEAP"。
+- `!heap`：显示所有堆的信息。这个命令是 SOS 扩展的一部分。
+- `.echo >>> INSTRUCTION POINTERS`：在调试器窗口中输出 ">>> INSTRUCTION POINTERS"。
+- `.block { ~* e ? {INSTRUCT_PTR} }`：对所有线程执行 `? {INSTRUCT_PTR}` 命令。`.block { ... }` 是一个块语句，它会执行花括号内的所有命令。`~* e ...` 是一个线程命令，它会对所有线程执行指定的命令。`? {INSTRUCT_PTR}` 显示当前指令指针的值。
+- `.echo >>> THREAD STACKS`：在调试器窗口中输出 ">>> THREAD STACKS"。
+- `~* kv n`：对所有线程执行 `kv n` 命令。`~* ...` 是一个线程命令，它会对所有线程执行指定的命令。`kv n` 显示带有源代码行号和参数值的堆栈跟踪。`n` 选项表示不要显示源文件名称和行号。
+- `.echo >>> LOADED MODULES`：在调试器窗口中输出 ">>> LOADED MODULES"。
+- `lmov`：显示所有已加载模块的详细信息，包括版本信息、时间戳、文件大小、加载地址、符号类型和符号文件路径。
+- `.echo >>> END OF LOG`：在调试器窗口中输出 ">>> END OF LOG"。
+- `.logclose`：关闭当前打开的日志文件。
+
+ */
