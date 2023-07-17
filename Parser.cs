@@ -112,6 +112,7 @@ namespace DumpReport
     /// </summary>
     abstract class Parser
     {
+        // 这是一个收集的过程.
         protected List<string> lines = new List<string>();
         protected MatchCollection matches = null;
         protected string pattern;

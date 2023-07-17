@@ -44,6 +44,7 @@ namespace DumpReport
         public const string END_OF_LOG = ">>> END OF LOG";
 
         // Parser objects
+        // 所有的解析程序, 都在这里进行了集中式管理.
         DumpInfoParser dumpInfoParser = new DumpInfoParser();
         TargetInfoParser targetInfoParser = new TargetInfoParser();
         ManagedThreadsParser managedThreadsParser = new ManagedThreadsParser();
@@ -69,6 +70,19 @@ namespace DumpReport
         // Maps the sections in the debugger's output file with the corresponding Parser object
         void MapParsers()
         {
+            // 不同的, 代表着不同的 parser 程序.
+            /*
+              public const string SECTION_MARK = ">>> ";
+        public const string TARGET_INFO = ">>> TARGET INFO";
+        public const string MANAGED_THREADS = ">>> MANAGED THREADS";
+        public const string MANAGED_STACKS = ">>> MANAGED STACKS";
+        public const string EXCEPTION_INFO = ">>> EXCEPTION INFO";
+        public const string HEAP = ">>> HEAP";
+        public const string INSTRUCT_PTRS = ">>> INSTRUCTION POINTERS";
+        public const string THREAD_STACKS = ">>> THREAD STACKS";
+        public const string LOADED_MODULES = ">>> LOADED MODULES";
+        public const string END_OF_LOG = ">>> END OF LOG";
+             */
             m_parsers.Add(String.Empty, dumpInfoParser);
             m_parsers.Add(TARGET_INFO, targetInfoParser);
             m_parsers.Add(MANAGED_THREADS, managedThreadsParser);
@@ -101,6 +115,7 @@ namespace DumpReport
             try
             {
                 MapParsers();
+                // 默认就是 dumpParser
                 Parser parser = dumpInfoParser;
 
                 using (StreamReader file = new StreamReader(config.LogFile, Encoding.Unicode))
@@ -128,6 +143,7 @@ namespace DumpReport
         {
             try
             {
+                // 将 log file 读取之后, 使用各个种类的 parser 逐个进行分析.
                 foreach (Parser parser in m_parsers.Values)
                     if (parser != null) parser.Parse();
                 CheckParserInfo();
@@ -235,7 +251,7 @@ namespace DumpReport
         {
             report.WriteDumpInfo(dumpInfoParser);
             report.WriteTargetInfo(targetInfoParser);
-            report.WriteModuleInfo(moduleParser.Modules);
+            report.WriteModuleInfo(moduleParser.Modules); // 这里面, 就是所有加载的 module 数组
             report.WriteNotes(notes);
         }
 
@@ -246,6 +262,7 @@ namespace DumpReport
             {
                 report.WriteSectionTitle("Exception Information");
                 report.WriteExceptionInfo(exceptionInfo);
+                // 在这里, 写入了崩溃调用堆栈的信息.
                 if (exceptionInfo.threadNum >= 0)
                     report.WriteFaultingThreadInfo(threadParser.GetThread(exceptionInfo.threadNum));
             }

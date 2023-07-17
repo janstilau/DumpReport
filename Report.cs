@@ -162,6 +162,7 @@ namespace DumpReport
         {
             if (stream == null) return;
 
+            // 写入各种崩溃程序的信息.
             if (targetInfo.CommandLine != null)
                 WriteValue("Command Line", targetInfo.CommandLine);
             if (targetInfo.ProcessId != null)
@@ -206,6 +207,7 @@ namespace DumpReport
 
         public void WriteExceptionInfo(ExceptionInfo exceptionInfo)
         {
+            // 在这, 写入了各种的崩溃信息
             if (exceptionInfo.description != null && exceptionInfo.description.Length > 0)
                 WriteValue("Exception", exceptionInfo.description);
             if (exceptionInfo.module != null && exceptionInfo.module.Length > 0)
