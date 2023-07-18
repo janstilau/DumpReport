@@ -72,7 +72,7 @@ namespace DumpReport
         {
             // 不同的, 代表着不同的 parser 程序.
             /*
-              public const string SECTION_MARK = ">>> ";
+        public const string SECTION_MARK = ">>> ";
         public const string TARGET_INFO = ">>> TARGET INFO";
         public const string MANAGED_THREADS = ">>> MANAGED THREADS";
         public const string MANAGED_STACKS = ">>> MANAGED STACKS";
@@ -83,6 +83,7 @@ namespace DumpReport
         public const string LOADED_MODULES = ">>> LOADED MODULES";
         public const string END_OF_LOG = ">>> END OF LOG";
              */
+            // 这里进行了注册了之后, 在进行 log 逐行解析的时候, 会在替换最终的 parser 对象.
             m_parsers.Add(String.Empty, dumpInfoParser);
             m_parsers.Add(TARGET_INFO, targetInfoParser);
             m_parsers.Add(MANAGED_THREADS, managedThreadsParser);
@@ -96,6 +97,7 @@ namespace DumpReport
         }
 
         // Returns the Parser object associated to the current section in the log
+        // 如果, 出现了新的 section 的标志, 那么就创建新的 parser 来收集后面的内容. 这在 readlog 里面, 会不断地替换 parser.
         Parser CheckNewSection(string line)
         {
             foreach (string section in m_parsers.Keys)
@@ -145,7 +147,9 @@ namespace DumpReport
             {
                 // 将 log file 读取之后, 使用各个种类的 parser 逐个进行分析.
                 foreach (Parser parser in m_parsers.Values)
+                    // 这个时候, 每个 parser 里面, 就都有各自 section 的所有 line 的内容了.
                     if (parser != null) parser.Parse();
+
                 CheckParserInfo();
             }
             catch (Exception ex)
@@ -161,6 +165,7 @@ namespace DumpReport
         {
             // Check if some PDB files have been loaded from the expected location
             bool PdbLoadedFromPath = false;
+            // 从 loaded modules 里面, 来完成是否有 PDB 文件加载完毕的判断. 
             foreach (ModuleInfo module in moduleParser.Modules)
                 if (module.pdbPath.ToUpper().Contains(config.PdbFolder.ToUpper()))
                     PdbLoadedFromPath = true;

@@ -73,6 +73,7 @@ namespace DumpReport
             }
             catch (Exception ex)
             {
+                // 获取到 ex 之后, 就是显示 ex 的 message 字段里面的内容
                 ShowError(ex.Message);
             }
 
