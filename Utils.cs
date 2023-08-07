@@ -130,5 +130,14 @@ namespace DumpReport
             }
             return path;
         }
+
+        public static string EscapeSpecialChars(string line)
+        {
+            return line.Replace("&", "&amp;").
+                Replace("<", "&lt;").
+                Replace(">", "&gt;").
+                Replace("\"", "&quot;").
+                Replace("'", "&apos;");
+        }
     }
 }

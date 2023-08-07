@@ -39,6 +39,32 @@ namespace DumpReport
             var json = JsonSerializer.Serialize(_keyValuePairs, options);
             File.WriteAllText(_outputFilePath, json);
         }
+
+        static Dictionary<string, object> GetThreadInfo(ThreadInfo threadInfo)
+        {
+            var result = new Dictionary<string, object>();
+            List<FrameInfo> stack = threadInfo.stack;
+            var stacks = new List<object>();
+            int counter = 0;
+            foreach (FrameInfo frame in stack)
+            {
+                var frameDict = GetStackFrameInfo(frame, counter);
+                stacks.Add(frameDict);
+                counter += 1;
+            }
+            return result;
+        }
+
+        static Dictionary<string, object> GetStackFrameInfo(FrameInfo frameInfo, int idx)
+        {
+            var result = new Dictionary<string, object>();
+            result["idx"] = idx.ToString();
+            result["module"] = frameInfo.module;
+            result["function"] = Utils.EscapeSpecialChars(frameInfo.function);
+            result["file"] = frameInfo.file;
+            result["line"] = frameInfo.line;
+            return result;
+        }
     }
 
 }
