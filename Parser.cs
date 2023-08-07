@@ -138,6 +138,7 @@ namespace DumpReport
             SosLoaded = false;
             Wow64Found = false;
 
+            // 逐行解析.
             for (int idx = 0; idx < lines.Count; idx++)
             {
                 if (lines[idx].Contains("Effective machine"))

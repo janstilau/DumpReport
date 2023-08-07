@@ -135,6 +135,7 @@ namespace DumpReport
                             parser.AddLine(line);
                     }
                 }
+                // 删除生成的Log文件, 因为它太大了.
                 //if (config.LogClean)
                     //File.Delete(config.LogFile);
             }

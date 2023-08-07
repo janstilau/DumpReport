@@ -13,7 +13,7 @@ namespace DumpReport
         const int EXIT_FAILURE = 1;
 
         static public string configFile = null;
-        static public string appDirectory = null;
+        static public string appDirectory = null; // 使用系统的API, 将当前进程的路径获取到了.
         static public bool is32bitDump = false; // True if the dump corresponds to a 32-bit process
         static int exitCode = EXIT_SUCCESS;
 
@@ -58,6 +58,8 @@ namespace DumpReport
 
                 // Process debugger's output
                 WriteConsole("Reading log...", true);
+
+                // 从现在开始, 就是在处理 log 文件了.
                 logManager.ReadLog();
                 logManager.ParseLog();
                 logManager.CombineParserInfo();
@@ -110,6 +112,7 @@ namespace DumpReport
 
         static async Task<bool> LaunchDebuggerAsync(Process process)
         {
+            // 在这里, 超时时间发挥了作用.
             return await Task.Run(() =>
             {
                 return process.WaitForExit(config.DbgTimeout * 60 * 1000); // Convert minutes to milliseconds
@@ -146,6 +149,7 @@ namespace DumpReport
             File.Delete(outFile);
 
             // Create the script file
+            // 将要运行的命令, 写入了 scriptFile 文件里面. 这样, 下面的命令是从文件中读取执行的
             using (StreamWriter stream = new StreamWriter(scriptFile))
                 stream.WriteLine(injectedScript);
 
@@ -160,6 +164,7 @@ namespace DumpReport
                 WindowStyle = ProcessWindowStyle.Hidden // WinDBG will only hide the main window
             };
 
+            // 启动了一个新的进程, 并且等待这个进程结束.
             Process process = new Process();
             process.StartInfo = psi;
             if (!process.Start())
@@ -187,6 +192,7 @@ namespace DumpReport
                 progress.DeleteProgressFile();
 
             // Check that the output log has been generated
+            // 使用了调试工具, 完成了日志文件的输出, 然后读取解析这个日志文件, 来进行真正的分析.
             if (!File.Exists(outFile))
                 throw new Exception("The debugger did not generate any output.");
         }
@@ -217,6 +223,7 @@ namespace DumpReport
                 is32bitDump = (wow64Found || x86Found);
             }
 
+            // 这里有什么问题吗, 可执行程序和 Debugger 的位数不相同.
             if (is32bitDump && GetDebuggerPath() == config.DbgExe64)
                 logManager.notes.Add("32-bit dump processed with a 64-bit debugger.");
             else if (!is32bitDump && GetDebuggerPath() == config.DbgExe32)
@@ -263,6 +270,7 @@ namespace DumpReport
             Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             Version version = assembly.GetName().Version;
             Console.ForegroundColor = ConsoleColor.White;
+            // C# 里面的格式化输出, 是使用了这种方式. {0} {1} {2} 这种方式.
             Console.WriteLine(String.Format("{0} {1}.{2}", Assembly.GetCallingAssembly().GetName().Name,
                 version.Major, version.Minor));
             Console.ResetColor();

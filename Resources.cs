@@ -196,6 +196,7 @@ A file named '{0}' must exist together with the executable.
 This file contains the default values of the parameters.
 Some can be overriden by command line.";
 
+        // 这里就是 Config 文件内部的, 每一个 key 对应的值的作用.
         static public string xmlHelpNodes = @"
 <Config>: Main node.
 <Debugger>:  Supported debuggers are WinDbg.exe and CDB.exe.
