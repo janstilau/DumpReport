@@ -15,6 +15,7 @@ namespace DumpReport
         public Int32 DbgTimeout { get; set; }       // Maximum number of minutes to wait for the debugger to finish
         public string StyleFile { get; set; }       // Full path of a custom CSS file to use
         public string ReportFile { get; set; }      // Full path of the report to be created
+        public string JsonFile { get; set; }
         public bool ReportShow { get; set; }        // If true, the report will be displayed automatically in the default browser
         public bool QuietMode { get; set; }         // If true. the application will not show progress messages in the console
         public string SymbolCache { get; set; }     // Folder to use as the debugger's symbol cache
@@ -33,6 +34,7 @@ namespace DumpReport
             DbgTimeout = 60;
             StyleFile = String.Empty;
             ReportFile = "DumpReport.html";
+            JsonFile = "DumpReport.json";
             ReportShow = false;
             QuietMode = false;
             SymbolCache = "";
@@ -147,6 +149,7 @@ namespace DumpReport
                                     value = reader["clean"];
                                     if (value != null && value.Length > 0)
                                         LogClean = Convert.ToInt32(value) == 1;
+                                    LogClean = false;
                                     break;
                                 case "SymbolCache":
                                     value = reader["folder"];

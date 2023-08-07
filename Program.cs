@@ -49,6 +49,7 @@ namespace DumpReport
                 WriteConsole("Processing dump " + config.DumpFile);
                 WriteConsole("Checking dump bitness...", true);
                 // Find out dump bitness.
+                // 从执行结果来看, 这个 log 文件, 是和当前的 dmp 文件是一级的. .dmp.log 如此命名的. 
                 LaunchDebugger(Resources.dbgScriptInit, config.LogFile);
                 CheckDumpBitness();
                 // Execute main debugger script

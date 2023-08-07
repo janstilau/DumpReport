@@ -313,7 +313,7 @@ namespace DumpReport
         /// <summary>
         /// Helper class that creates an HTML table
         /// </summary>
-        class Table
+        public class Table
         {
             string html;
             public bool EmphasizeFirstCol { get; set; }
