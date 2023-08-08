@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace DumpReport
 {
@@ -25,6 +26,7 @@ namespace DumpReport
         public void Open(string file)
         {
             stream = new StreamWriter(Utils.GetAbsolutePath(file));
+            //stream = null; // YD 修改, 不在期望进行 html 的输出, 只进行JSON 的输出.
             BeginDocument();
         }
 
@@ -103,6 +105,7 @@ namespace DumpReport
 
         void WriteValue(string name, string value)
         {
+            if (stream == null) return;
             string line = string.Format("<b>{0}: </b>{1}", name, value);
             Write(line);
         }
@@ -126,6 +129,7 @@ namespace DumpReport
         // Imports the CSS code from an external file
         bool ImportStyle(string path)
         {
+            if (stream == null) return false;
             try
             {
                 string style = File.ReadAllText(path);
@@ -198,6 +202,8 @@ namespace DumpReport
 
         public void WriteNotes(List<string> notes)
         {
+            if (stream == null) return;
+
             if (notes.Count > 0)
                 Write("<br><b>Notes:</b>");
             foreach (string note in notes)
@@ -273,6 +279,7 @@ namespace DumpReport
         // Writes 'content' in an HTML section that can be collapsed or expanded with a button
         void InsertToggleContent(string label, string content, bool show = false, string buttonId = null, string divName = null)
         {
+            if (stream == null) return;
             string id = label.Replace(" ", String.Empty);
             string displayStyle = null;
             if (buttonId == null)

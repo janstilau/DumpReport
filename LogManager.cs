@@ -60,10 +60,13 @@ namespace DumpReport
         Report report = null; // Outputs extracted data to an HTML file
         Config config = null; // Stores the paramaters of the application
 
+        JsonOutput jsonOutput = null; // Outputs extracted data to a JSON file
+
         public LogManager(Config config, Report report)
         {
             this.config = config;
             this.report = report;
+            this.jsonOutput = new JsonOutput();
         }
 
         // Maps the sections in the debugger's output file with the corresponding Parser object
@@ -223,10 +226,12 @@ namespace DumpReport
         public void WriteReport()
         {
             Program.WriteConsole("Creating report...", true);
+            jsonOutput.Open(config.JsonFile);
             WriteHeader();
             WriteExceptionInfo();
             WriteAllThreads();
             report.WriteJavascript(threadParser.GetNumThreads());
+            jsonOutput.WriteToFile();
             Program.WriteConsole("\rReport created in " + config.ReportFile);
         }
 
@@ -237,6 +242,24 @@ namespace DumpReport
             report.WriteTargetInfo(targetInfoParser);
             report.WriteModuleInfo(moduleParser.Modules);
             report.WriteNotes(notes);
+
+            jsonOutput.AddKeyValuePair("Dump Creation Time", dumpInfoParser.CreationTime);
+            if (dumpInfoParser.DumpBitness != null)
+            {
+                string dumpType = dumpInfoParser.DumpBitness;
+                if (dumpInfoParser.Wow64Found)
+                    dumpType += " (64-bit dump)";
+                jsonOutput.AddKeyValuePair("Dump Architecture", dumpType);
+            }
+            if (targetInfoParser.CommandLine != null)
+                jsonOutput.AddKeyValuePair("Command Line", targetInfoParser.CommandLine);
+            if (targetInfoParser.ProcessId != null)
+                jsonOutput.AddKeyValuePair("Process Id", string.Format("{0} ({1})", targetInfoParser.ProcessId, Utils.StrHexToUInt64(targetInfoParser.ProcessId)));
+            if (targetInfoParser.ComputerName != null)
+                jsonOutput.AddKeyValuePair("Computer Name", targetInfoParser.ComputerName);
+            if (targetInfoParser.UserName != null)
+                jsonOutput.AddKeyValuePair("User Name", targetInfoParser.UserName);
+            jsonOutput.AddKeyValuePair("Operating System", targetInfoParser.OsInfo);
         }
 
         // Tries to find an exception in the dump file and writes the info to the report.
@@ -248,9 +271,28 @@ namespace DumpReport
                 report.WriteExceptionInfo(exceptionInfo);
                 if (exceptionInfo.threadNum >= 0)
                     report.WriteFaultingThreadInfo(threadParser.GetThread(exceptionInfo.threadNum));
+
+                if (exceptionInfo.description != null && exceptionInfo.description.Length > 0)
+                    jsonOutput.AddKeyValuePair("Exception", exceptionInfo.description);
+                if (exceptionInfo.module != null && exceptionInfo.module.Length > 0)
+                    jsonOutput.AddKeyValuePair("Module", exceptionInfo.module);
+                if (exceptionInfo.address > 0)
+                    jsonOutput.AddKeyValuePair("Exception Address", Utils.UInt64toStringHex(exceptionInfo.address));
+                if (exceptionInfo.frame != null && exceptionInfo.frame.Length > 0)
+                    jsonOutput.AddKeyValuePair("Faulting Frame", Utils.EscapeSpecialChars(exceptionInfo.frame));
+
+                if (exceptionInfo.threadNum >= 0)
+                {
+                    ThreadInfo threadInfo = threadParser.GetThread(exceptionInfo.threadNum);
+                    var stacks = JsonOutput.GetThreadInfo(threadInfo);
+                    jsonOutput.AddKeyValuePair("Call Stack", stacks);
+                }
             }
             else
+            {
                 report.Write("No exception found.");
+            }
+               
         }
 
         // Write the information of all threads found in the dump file

@@ -14,6 +14,7 @@ namespace DumpReport
         public Int32 DbgTimeout { get; set; }       // Maximum number of minutes to wait for the debugger to finish
         public string StyleFile { get; set; }       // Full path of a custom CSS file to use
         public string ReportFile { get; set; }      // Full path of the report to be created
+        public string JsonFile { get; set;  }   // JSON 文件输出解析内容.
         public bool ReportShow { get; set; }        // If true, the report will be displayed automatically in the default browser
         public bool QuietMode { get; set; }         // If true. the application will not show progress messages in the console
         public string SymbolCache { get; set; }     // Folder to use as the debugger's symbol cache
@@ -31,6 +32,7 @@ namespace DumpReport
             DbgTimeout = 60;
             StyleFile = String.Empty;
             ReportFile = "DumpReport.html";
+            JsonFile = "";
             ReportShow = false;
             QuietMode = false;
             SymbolCache = "";
@@ -145,6 +147,14 @@ namespace DumpReport
             }
         }
 
+        private string ChangeExtensionToJson(string filePath)
+        {
+            string directory = Path.GetDirectoryName(filePath);
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            string newFilePath = Path.Combine(directory, fileName + ".json");
+            return newFilePath;
+        }
+
         // Reads the parameters from the command-line
         public void ReadCommandLine(string[] args)
         {
@@ -162,10 +172,16 @@ namespace DumpReport
                     else if (args[idx] == "/REPORTFILE") ReportFile = GetParamValue(args, ref idx);
                     else if (args[idx] == "/SHOWREPORT") ReportShow = (GetParamValue(args, ref idx) == "1");
                     else if (args[idx] == "/QUIET") QuietMode = (GetParamValue(args, ref idx) == "1");
+                    else if (args[idx] == "/JSON") JsonFile = GetParamValue(args, ref idx);
                     else throw new ArgumentException("Invalid parameter " + args[idx]);
                 }
                 if (DumpFile.Length == 0)
                     throw new ArgumentException("/DUMPFILE parameter not found");
+                
+                if (JsonFile.Length == 0)
+                {
+                    JsonFile = ChangeExtensionToJson(DumpFile);
+                }
             }
             catch (ArgumentException ex)
             {
