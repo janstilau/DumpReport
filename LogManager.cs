@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace DumpReport
 {
@@ -243,23 +244,38 @@ namespace DumpReport
             report.WriteModuleInfo(moduleParser.Modules);
             report.WriteNotes(notes);
 
-            jsonOutput.AddKeyValuePair("Dump Creation Time", dumpInfoParser.CreationTime);
-            if (dumpInfoParser.DumpBitness != null)
             {
-                string dumpType = dumpInfoParser.DumpBitness;
-                if (dumpInfoParser.Wow64Found)
-                    dumpType += " (64-bit dump)";
-                jsonOutput.AddKeyValuePair("Dump Architecture", dumpType);
+                jsonOutput.AddKeyValuePair("Report Creation Time", Utils.GetUtcTimeFromLocalTime(DateTime.Now));
+                jsonOutput.AddKeyValuePair("Dump File", config.DumpFile);
             }
-            if (targetInfoParser.CommandLine != null)
-                jsonOutput.AddKeyValuePair("Command Line", targetInfoParser.CommandLine);
-            if (targetInfoParser.ProcessId != null)
-                jsonOutput.AddKeyValuePair("Process Id", string.Format("{0} ({1})", targetInfoParser.ProcessId, Utils.StrHexToUInt64(targetInfoParser.ProcessId)));
-            if (targetInfoParser.ComputerName != null)
-                jsonOutput.AddKeyValuePair("Computer Name", targetInfoParser.ComputerName);
-            if (targetInfoParser.UserName != null)
-                jsonOutput.AddKeyValuePair("User Name", targetInfoParser.UserName);
-            jsonOutput.AddKeyValuePair("Operating System", targetInfoParser.OsInfo);
+
+            { // WriteDumpInfo
+                jsonOutput.AddKeyValuePair("Dump Creation Time", dumpInfoParser.CreationTime);
+                if (dumpInfoParser.DumpBitness != null)
+                {
+                    string dumpType = dumpInfoParser.DumpBitness;
+                    if (dumpInfoParser.Wow64Found)
+                        dumpType += " (64-bit dump)";
+                    jsonOutput.AddKeyValuePair("Dump Architecture", dumpType);
+                }
+            }
+
+            { // WriteTargetInfo
+                if (targetInfoParser.CommandLine != null)
+                    jsonOutput.AddKeyValuePair("Command Line", targetInfoParser.CommandLine);
+                if (targetInfoParser.ProcessId != null)
+                    jsonOutput.AddKeyValuePair("Process Id", string.Format("{0} ({1})", targetInfoParser.ProcessId, Utils.StrHexToUInt64(targetInfoParser.ProcessId)));
+                if (targetInfoParser.ComputerName != null)
+                    jsonOutput.AddKeyValuePair("Computer Name", targetInfoParser.ComputerName);
+                if (targetInfoParser.UserName != null)
+                    jsonOutput.AddKeyValuePair("User Name", targetInfoParser.UserName);
+                jsonOutput.AddKeyValuePair("Operating System", targetInfoParser.OsInfo);
+            }
+
+            { // WriteModuleInfo
+                var loadedModules = JsonOutput.GetAllLoadedModules(moduleParser.Modules);
+                jsonOutput.AddKeyValuePair("Loaded Modules", loadedModules);
+            }
         }
 
         // Tries to find an exception in the dump file and writes the info to the report.
@@ -272,20 +288,25 @@ namespace DumpReport
                 if (exceptionInfo.threadNum >= 0)
                     report.WriteFaultingThreadInfo(threadParser.GetThread(exceptionInfo.threadNum));
 
-                if (exceptionInfo.description != null && exceptionInfo.description.Length > 0)
-                    jsonOutput.AddKeyValuePair("Exception", exceptionInfo.description);
-                if (exceptionInfo.module != null && exceptionInfo.module.Length > 0)
-                    jsonOutput.AddKeyValuePair("Module", exceptionInfo.module);
-                if (exceptionInfo.address > 0)
-                    jsonOutput.AddKeyValuePair("Exception Address", Utils.UInt64toStringHex(exceptionInfo.address));
-                if (exceptionInfo.frame != null && exceptionInfo.frame.Length > 0)
-                    jsonOutput.AddKeyValuePair("Faulting Frame", Utils.EscapeSpecialChars(exceptionInfo.frame));
+                { // WriteExceptionInfo
+                    if (exceptionInfo.description != null && exceptionInfo.description.Length > 0)
+                        jsonOutput.AddKeyValuePair("Exception", exceptionInfo.description);
+                    if (exceptionInfo.module != null && exceptionInfo.module.Length > 0)
+                        jsonOutput.AddKeyValuePair("Module", exceptionInfo.module);
+                    if (exceptionInfo.address > 0)
+                        jsonOutput.AddKeyValuePair("Exception Address", Utils.UInt64toStringHex(exceptionInfo.address));
+                    if (exceptionInfo.frame != null && exceptionInfo.frame.Length > 0)
+                        jsonOutput.AddKeyValuePair("Faulting Frame", Utils.EscapeSpecialChars(exceptionInfo.frame));
+                }
 
-                if (exceptionInfo.threadNum >= 0)
-                {
-                    ThreadInfo threadInfo = threadParser.GetThread(exceptionInfo.threadNum);
-                    var stacks = JsonOutput.GetThreadInfo(threadInfo);
-                    jsonOutput.AddKeyValuePair("Call Stack", stacks);
+
+                { // WriteFaultingThreadInfo
+                    if (exceptionInfo.threadNum >= 0)
+                    {
+                        ThreadInfo threadInfo = threadParser.GetThread(exceptionInfo.threadNum);
+                        var stacks = JsonOutput.GetThreadInfo(threadInfo);
+                        jsonOutput.AddKeyValuePair("Call Stack", stacks);
+                    }
                 }
             }
             else

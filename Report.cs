@@ -25,8 +25,8 @@ namespace DumpReport
         // Creates the report file
         public void Open(string file)
         {
-            stream = new StreamWriter(Utils.GetAbsolutePath(file));
-            //stream = null; // YD 修改, 不在期望进行 html 的输出, 只进行JSON 的输出.
+            //stream = new StreamWriter(Utils.GetAbsolutePath(file));
+            stream = null; // YD 修改, 不在期望进行 html 的输出, 只进行JSON 的输出.
             BeginDocument();
         }
 
